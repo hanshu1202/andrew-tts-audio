@@ -1,4 +1,4 @@
-name: Download Video from Gofile
+name: Download Video from StorageToBox
 
 on:
   workflow_dispatch:
@@ -13,12 +13,12 @@ jobs:
 
     - name: Download Video File
       run: |
-        # Direct URL provided by the user
-        VIDEO_URL="https://store-eu-par-3.gofile.io/download/web/8880e7cd-b985-4922-81cf-471d650afde0/input_video.mp4"
+        # Direct URL with signature parameters
+        VIDEO_URL="https://cdn.storagetobox.com/167761b1-178c-4f61-b810-f6eff2b77ff8?expires=1791347360&filename=input_video.mp4&id=NyuwpN1D5&sig=858a4a5c3f94870859ae435b95f6fff6de7d79ef457c27f9a3b1559ecbc3aed5"
         OUT_FILE="input_video.mp4"
         
-        echo "Downloading video file from Gofile..."
-        # Using -f to make the step fail immediately if the link expires or gives a 404/503 error
+        echo "Downloading video file..."
+        # -f fails the step immediately if the link expires or errors out
         curl -fL "$VIDEO_URL" -o "$OUT_FILE"
 
     - name: Commit and Push Changes
@@ -26,8 +26,8 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Track the newly downloaded mp4 file
+        # Track the video file
         git add input_video.mp4
         
-        # Check if the file is new or modified before attempting a commit
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated update: Downloaded input_video.mp4" && git push)
+        # Only commit if the video has changed or is new
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated update: Downloaded new input_video.mp4" && git push)
