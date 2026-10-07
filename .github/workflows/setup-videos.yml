@@ -1,0 +1,40 @@
+name: 🛠️ Setup Source Videos
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: "URL of the video to upload"
+        required: true
+        default: "https://cdn.storagetobox.com/167761b1-178c-4f61-b810-f6eff2b77ff8?expires=1791347360&filename=input_video.mp4&id=NyuwpN1D5&sig=858a4a5c3f94870859ae435b95f6fff6de7d79ef457c27f9a3b1559ecbc3aed5"
+      video_name:
+        description: "Filename for the video (e.g. input_video.mp4)"
+        required: true
+        default: "input_video.mp4"
+
+jobs:
+  split-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download and Split Video
+        run: |
+          mkdir -p source_videos
+          echo "Downloading video..."
+          curl -L "${{ github.event.inputs.video_url }}" -o temp_video.mp4
+
+          echo "Splitting video into 80MB chunks..."
+          # Split into 80MB parts to stay safely under GitHub's 100MB limit
+          split -b 80M -d "temp_video.mp4" "source_videos/${{ github.event.inputs.video_name }}.part"
+
+          rm temp_video.mp4
+          echo "✅ Video split into parts"
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add source_videos/
+          git commit -m "Upload split video parts for ${{ github.event.inputs.video_name }}"
+          git push
