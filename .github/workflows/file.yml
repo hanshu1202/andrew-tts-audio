@@ -1,38 +1,33 @@
-name: Download File from Google Drive
+name: Download Video from Gofile
 
 on:
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  # Optional: Schedule it to run automatically (e.g., every day at midnight)
-  # schedule:
-  #   - cron: '0 0 * * *'
 
 jobs:
   download-and-commit:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Check out your repository so the workflow can save files to it
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # Step 2: Download the file using the Google Drive direct download URL structure
-    - name: Download File from Google Drive
+    - name: Download Video File
       run: |
-        FILE_ID="1mHjAYExAr4UO7DpRZfIHI2-fmVfJOShD"
-        OUT_FILE="downloaded_file.ext" # Change this to your preferred filename and extension
+        # Direct URL provided by the user
+        VIDEO_URL="https://store-eu-par-3.gofile.io/download/web/8880e7cd-b985-4922-81cf-471d650afde0/input_video.mp4"
+        OUT_FILE="input_video.mp4"
         
-        # Download the file using curl, handling potential large file confirmation prompts
-        curl -L "https://google.com{FILE_ID}" -o "$OUT_FILE"
+        echo "Downloading video file from Gofile..."
+        # Using -f to make the step fail immediately if the link expires or gives a 404/503 error
+        curl -fL "$VIDEO_URL" -o "$OUT_FILE"
 
-    # Step 3: Commit and push the downloaded file back to the repository
     - name: Commit and Push Changes
       run: |
         git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@://github.com"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Add the specific file, commit, and push
-        git add downloaded_file.ext
+        # Track the newly downloaded mp4 file
+        git add input_video.mp4
         
-        # Only commit if the file actually changed or is new
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated update: Downloaded file from Google Drive" && git push)
+        # Check if the file is new or modified before attempting a commit
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated update: Downloaded input_video.mp4" && git push)
