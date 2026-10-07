@@ -1,0 +1,38 @@
+name: Download File from Google Drive
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  # Optional: Schedule it to run automatically (e.g., every day at midnight)
+  # schedule:
+  #   - cron: '0 0 * * *'
+
+jobs:
+  download-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Check out your repository so the workflow can save files to it
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # Step 2: Download the file using the Google Drive direct download URL structure
+    - name: Download File from Google Drive
+      run: |
+        FILE_ID="1mHjAYExAr4UO7DpRZfIHI2-fmVfJOShD"
+        OUT_FILE="downloaded_file.ext" # Change this to your preferred filename and extension
+        
+        # Download the file using curl, handling potential large file confirmation prompts
+        curl -L "https://google.com{FILE_ID}" -o "$OUT_FILE"
+
+    # Step 3: Commit and push the downloaded file back to the repository
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@://github.com"
+        
+        # Add the specific file, commit, and push
+        git add downloaded_file.ext
+        
+        # Only commit if the file actually changed or is new
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated update: Downloaded file from Google Drive" && git push)
